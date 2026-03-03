@@ -22,6 +22,8 @@ except ImportError:
 __version__ = _get_version("sfeos-tools")
 
 from .bbox_shape import run_add_bbox_shape
+from .catalog_ingestion import ingest_from_xml
+from .cli_options import database_options, stac_api_options
 from .data_loader import load_items
 from .reindex import run as unified_reindex_run
 
@@ -43,35 +45,7 @@ def cli():
     required=True,
     help="Database backend to use",
 )
-@click.option(
-    "--host",
-    type=str,
-    default=None,
-    help="Database host (default: localhost or ES_HOST env var)",
-)
-@click.option(
-    "--port",
-    type=int,
-    default=None,
-    help="Database port (default: 9200 for ES, 9202 for OS, or ES_PORT env var)",
-)
-@click.option(
-    "--use-ssl/--no-ssl",
-    default=None,
-    help="Use SSL connection (default: true or ES_USE_SSL env var)",
-)
-@click.option(
-    "--user",
-    type=str,
-    default=None,
-    help="Database username (default: ES_USER env var)",
-)
-@click.option(
-    "--password",
-    type=str,
-    default=None,
-    help="Database password (default: ES_PASS env var)",
-)
+@database_options
 def add_bbox_shape(backend, host, port, use_ssl, user, password):
     """Add bbox_shape field to existing collections for spatial search support.
 
@@ -134,35 +108,7 @@ def add_bbox_shape(backend, host, port, use_ssl, user, password):
     required=True,
     help="Database backend to use",
 )
-@click.option(
-    "--host",
-    type=str,
-    default=None,
-    help="Database host (default: localhost or ES_HOST env var)",
-)
-@click.option(
-    "--port",
-    type=int,
-    default=None,
-    help="Database port (default: 9200 for ES, 9202 for OS, or ES_PORT env var)",
-)
-@click.option(
-    "--use-ssl/--no-ssl",
-    default=None,
-    help="Use SSL connection (default: true or ES_USE_SSL env var)",
-)
-@click.option(
-    "--user",
-    type=str,
-    default=None,
-    help="Database username (default: ES_USER env var)",
-)
-@click.option(
-    "--password",
-    type=str,
-    default=None,
-    help="Database password (default: ES_PASS env var)",
-)
+@database_options
 @click.option(
     "--yes",
     is_flag=True,
@@ -234,7 +180,7 @@ def reindex(backend, host, port, use_ssl, user, password, yes):
 
 
 @cli.command("load-data")
-@click.option("--base-url", required=True, help="Base URL of the STAC API")
+@stac_api_options
 @click.option(
     "--collection-id",
     default="test-collection",
@@ -247,7 +193,7 @@ def reindex(backend, host, port, use_ssl, user, password, yes):
     default="sample_data/",
     help="Directory containing collection.json and feature collection file",
 )
-def load_data(base_url: str, collection_id: str, use_bulk: bool, data_dir: str) -> None:
+def load_data(stac_url: str, collection_id: str, use_bulk: bool, data_dir: str) -> None:
     """Load STAC items into the database via STAC API.
 
     This command loads a STAC collection and its items from local JSON files
@@ -256,14 +202,14 @@ def load_data(base_url: str, collection_id: str, use_bulk: bool, data_dir: str) 
     - One or more feature collection JSON files with STAC items
 
     Examples:
-        sfeos-tools load-data --base-url http://localhost:8080
-        sfeos-tools load-data --base-url http://localhost:8080 --collection-id my-collection --use-bulk
-        sfeos-tools load-data --base-url http://localhost:8080 --data-dir /path/to/data
+        sfeos-tools load-data --stac-url http://localhost:8080
+        sfeos-tools load-data --stac-url http://localhost:8080 --collection-id my-collection --use-bulk
+        sfeos-tools load-data --stac-url http://localhost:8080 --data-dir /path/to/data
     """
     from httpx import Client
 
     try:
-        with Client(base_url=base_url) as client:
+        with Client(base_url=stac_url) as client:
             load_items(client, collection_id, use_bulk, data_dir)
         click.echo(click.style("✓ Data loading completed successfully", fg="green"))
     except KeyboardInterrupt:
@@ -275,12 +221,64 @@ def load_data(base_url: str, collection_id: str, use_bulk: bool, data_dir: str) 
         sys.exit(1)
 
 
-@cli.command("viewer")
+@cli.command("ingest-catalog")
 @click.option(
-    "--stac-url",
-    default="http://localhost:8080",
-    help="STAC API base URL (default: http://localhost:8080)",
+    "--xml-file",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to RDF/XML file containing SKOS concepts",
 )
+@stac_api_options
+def ingest_catalog(xml_file: str, stac_url: str) -> None:
+    """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
+
+    This command parses an RDF/XML file containing SKOS concepts and creates
+    a hierarchical catalog structure in the STAC API. It handles:
+    - Creating catalogs from SKOS concepts
+    - Establishing parent-child relationships (skos:narrower)
+    - Preserving semantic links (skos:related, skos:exactMatch, etc.)
+    - Including metadata from definitions and modification dates
+
+    Examples:
+        sfeos-tools ingest-catalog --xml-file thesaurus.rdf
+        sfeos-tools ingest-catalog --xml-file thesaurus.rdf --stac-url http://localhost:8080
+        sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com
+    """
+    try:
+        ingest_from_xml(xml_file, stac_url)
+        click.echo(
+            click.style("✓ Catalog ingestion completed successfully", fg="green")
+        )
+    except KeyboardInterrupt:
+        click.echo(click.style("\n✗ Ingestion interrupted by user", fg="yellow"))
+        sys.exit(1)
+    except FileNotFoundError as e:
+        click.echo(click.style(f"✗ File not found: {e}", fg="red"))
+        sys.exit(1)
+    except Exception as e:
+        error_msg = str(e)
+        click.echo(click.style(f"✗ Ingestion failed: {error_msg}", fg="red"))
+
+        # Provide helpful hints for common errors
+        if "Connection refused" in error_msg:
+            click.echo(
+                click.style(
+                    "\n💡 Hint: Make sure your STAC API is running and accessible at the specified URL",
+                    fg="yellow",
+                )
+            )
+        elif "parse" in error_msg.lower():
+            click.echo(
+                click.style(
+                    "\n💡 Hint: Verify that the XML file is valid RDF/XML format",
+                    fg="yellow",
+                )
+            )
+        sys.exit(1)
+
+
+@cli.command("viewer")
+@stac_api_options
 @click.option(
     "--port",
     type=int,

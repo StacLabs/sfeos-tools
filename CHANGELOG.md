@@ -6,6 +6,24 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+### Added
+
+- Added `ingest-catalog` command to create STAC catalogs and sub-catalogs from SKOS/RDF-XML files
+- Added `catalog_ingestion` module with support for parsing RDF/XML thesaurus files and establishing hierarchical catalog relationships
+- Added comprehensive test suite for catalog ingestion with 19 test cases covering XML parsing, hierarchy establishment, and semantic link preservation
+- Added `cli_options` module with reusable decorators for standardized connection options across CLI commands
+
+### Changed
+
+- Standardized CLI connection options across all commands using `@database_options` and `@stac_api_options` decorators
+- Renamed `load-data` command's `--base-url` option to `--stac-url` for consistency with other STAC API commands
+- Moved test data files (`skos-test-topics.rdf`, `skos-test-topics-2.rdf`) to `tests/` directory for better organization
+
+### Dependencies
+
+- Added `rdflib>=6.0.0` for RDF/XML parsing
+- Added `requests>=2.28.0` for HTTP requests
+
 ## [v0.3.0] - 2025-10-24
 
 ### Added

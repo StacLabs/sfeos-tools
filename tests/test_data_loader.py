@@ -293,7 +293,7 @@ class TestCLILoadData:
                 cli,
                 [
                     "load-data",
-                    "--base-url",
+                    "--stac-url",
                     "http://localhost:8080",
                     "--collection-id",
                     "test-collection",
@@ -330,7 +330,7 @@ class TestCLILoadData:
                 cli,
                 [
                     "load-data",
-                    "--base-url",
+                    "--stac-url",
                     "http://localhost:8080",
                     "--collection-id",
                     "test-collection",
@@ -344,12 +344,17 @@ class TestCLILoadData:
         assert "✓ Data loading completed successfully" in result.output
 
     def test_cli_load_data_missing_base_url(self):
-        """Test CLI load-data command fails without base-url."""
+        """Test CLI load-data command fails without data directory."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["load-data"])
+        result = runner.invoke(
+            cli, ["load-data", "--stac-url", "http://localhost:8080"]
+        )
 
         assert result.exit_code != 0
-        assert "Missing option '--base-url'" in result.output
+        assert (
+            "No feature collection files found" in result.output
+            or "failed" in result.output.lower()
+        )
 
     def test_cli_load_data_handles_error(self, tmp_path):
         """Test CLI load-data command handles errors gracefully."""
@@ -374,7 +379,7 @@ class TestCLILoadData:
                 cli,
                 [
                     "load-data",
-                    "--base-url",
+                    "--stac-url",
                     "http://localhost:8080",
                     "--data-dir",
                     str(tmp_path),
