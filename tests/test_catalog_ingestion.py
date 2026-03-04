@@ -1,7 +1,7 @@
 """Tests for catalog_ingestion module."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
@@ -61,7 +61,8 @@ class TestIngestFromXml:
 
         # Check that POST calls were made to /catalogs endpoint
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if "/catalogs" in str(call) and "catalogs/" not in str(call)
         ]
         assert len(catalog_calls) > 0
@@ -77,7 +78,8 @@ class TestIngestFromXml:
 
         # Check that hierarchy links were created
         hierarchy_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if "/catalogs/" in str(call) and "/catalogs" in str(call)
         ]
         assert len(hierarchy_calls) > 0
@@ -103,7 +105,8 @@ class TestIngestFromXml:
 
         # Get the first catalog creation call
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if "/catalogs" in str(call) and "catalogs/" not in str(call)
         ]
         assert len(catalog_calls) > 0
@@ -132,7 +135,8 @@ class TestIngestFromXml:
 
         # Find a call with a definition
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if "/catalogs" in str(call) and "catalogs/" not in str(call)
         ]
 
@@ -140,7 +144,10 @@ class TestIngestFromXml:
         has_definition = False
         for call in catalog_calls:
             payload = call[1]["json"]
-            if "definition" in payload["description"].lower() or "Last modified" in payload["description"]:
+            if (
+                "definition" in payload["description"].lower()
+                or "Last modified" in payload["description"]
+            ):
                 has_definition = True
                 break
 
@@ -157,7 +164,8 @@ class TestIngestFromXml:
 
         # Find calls with semantic links
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if "/catalogs" in str(call) and "catalogs/" not in str(call)
         ]
 
@@ -167,7 +175,9 @@ class TestIngestFromXml:
             payload = call[1]["json"]
             if payload.get("links"):
                 for link in payload["links"]:
-                    if "gcmd" in link.get("href", "") or "gemet" in link.get("href", ""):
+                    if "gcmd" in link.get("href", "") or "gemet" in link.get(
+                        "href", ""
+                    ):
                         has_external_links = True
                         break
 
@@ -188,8 +198,7 @@ class TestIngestCatalogCLI:
         """Test error handling for non-existent file."""
         runner = CliRunner()
         result = runner.invoke(
-            cli,
-            ["ingest-catalog", "--xml-file", "/nonexistent/file.rdf"]
+            cli, ["ingest-catalog", "--xml-file", "/nonexistent/file.rdf"]
         )
         assert result.exit_code != 0
 
@@ -204,8 +213,7 @@ class TestIngestCatalogCLI:
         test_xml_file = Path(__file__).parent / "skos-test-topics.rdf"
 
         result = runner.invoke(
-            cli,
-            ["ingest-catalog", "--xml-file", str(test_xml_file)]
+            cli, ["ingest-catalog", "--xml-file", str(test_xml_file)]
         )
 
         assert result.exit_code == 0
@@ -226,9 +234,11 @@ class TestIngestCatalogCLI:
             cli,
             [
                 "ingest-catalog",
-                "--xml-file", str(test_xml_file),
-                "--stac-url", custom_url
-            ]
+                "--xml-file",
+                str(test_xml_file),
+                "--stac-url",
+                custom_url,
+            ],
         )
 
         assert result.exit_code == 0
@@ -247,8 +257,7 @@ class TestIngestCatalogCLI:
         test_xml_file = Path(__file__).parent / "skos-test-topics.rdf"
 
         result = runner.invoke(
-            cli,
-            ["ingest-catalog", "--xml-file", str(test_xml_file)]
+            cli, ["ingest-catalog", "--xml-file", str(test_xml_file)]
         )
 
         assert result.exit_code != 0
@@ -280,7 +289,8 @@ class TestIngestWithTestData:
         # Verify that expected concepts were created
         # Filter for calls to /catalogs endpoint (not /catalogs/{id}/catalogs)
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if call[0][0].endswith("/catalogs")
         ]
 
@@ -308,7 +318,8 @@ class TestIngestWithTestData:
         # Verify that expected concepts were created
         # Filter for calls to /catalogs endpoint (not /catalogs/{id}/catalogs)
         catalog_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if call[0][0].endswith("/catalogs")
         ]
 

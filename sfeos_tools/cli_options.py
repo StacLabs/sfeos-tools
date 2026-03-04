@@ -5,7 +5,7 @@ import click
 
 def database_options(f):
     """Add standardized database connection options to a CLI command.
-    
+
     Adds the following options:
     - --host: Database host
     - --port: Database port
@@ -47,7 +47,7 @@ def database_options(f):
 
 def stac_api_options(f):
     """Add standardized STAC API connection options to a CLI command.
-    
+
     Adds the following option:
     - --stac-url: STAC API base URL
     """
