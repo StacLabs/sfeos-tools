@@ -13,6 +13,7 @@ import logging
 import sys
 
 import click
+import requests
 
 try:
     from importlib.metadata import version as _get_version
@@ -264,18 +265,32 @@ def ingest_catalog(
         error_msg = str(e)
         click.echo(click.style(f"✗ Ingestion failed: {error_msg}", fg="red"))
 
-        # Provide helpful hints for common errors
-        if "Connection refused" in error_msg:
+        # Provide helpful hints for specific error types
+        if isinstance(e, requests.exceptions.ConnectionError):
             click.echo(
                 click.style(
-                    "\n💡 Hint: Make sure your STAC API is running and accessible at the specified URL",
+                    "\nHint: Connection refused. Make sure your STAC API is running and accessible at the specified URL",
                     fg="yellow",
                 )
             )
-        elif "parse" in error_msg.lower():
+        elif isinstance(e, requests.exceptions.Timeout):
             click.echo(
                 click.style(
-                    "\n💡 Hint: Verify that the XML file is valid RDF/XML format",
+                    "\nHint: Request timeout. The STAC API took too long to respond. Check your network connection and the API status",
+                    fg="yellow",
+                )
+            )
+        elif isinstance(e, requests.exceptions.RequestException):
+            click.echo(
+                click.style(
+                    "\nHint: Network request failed. Check your STAC API URL and network connectivity",
+                    fg="yellow",
+                )
+            )
+        elif isinstance(e, Exception) and "parse" in error_msg.lower():
+            click.echo(
+                click.style(
+                    "\nHint: XML parsing error. Verify that the XML file is valid RDF/XML format",
                     fg="yellow",
                 )
             )
