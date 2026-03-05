@@ -229,7 +229,8 @@ def load_data(stac_url: str, collection_id: str, use_bulk: bool, data_dir: str) 
     help="Path to RDF/XML file containing SKOS concepts",
 )
 @stac_api_options
-def ingest_catalog(xml_file: str, stac_url: str) -> None:
+@database_options
+def ingest_catalog(xml_file: str, stac_url: str, host, port, use_ssl, user, password) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
     This command parses an RDF/XML file containing SKOS concepts and creates
@@ -245,7 +246,7 @@ def ingest_catalog(xml_file: str, stac_url: str) -> None:
         sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com
     """
     try:
-        ingest_from_xml(xml_file, stac_url)
+        ingest_from_xml(xml_file, stac_url, user=user, password=password, use_ssl=use_ssl)
         click.echo(
             click.style("✓ Catalog ingestion completed successfully", fg="green")
         )
