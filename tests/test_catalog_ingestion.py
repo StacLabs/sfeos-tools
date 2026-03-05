@@ -81,17 +81,19 @@ class TestIngestFromXml:
         subcatalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs" in call[0][0] and call[0][0].endswith("/catalogs")
-            and not call[0][0].endswith("/catalogs") or "/catalogs/" in call[0][0]
+            if "/catalogs" in call[0][0]
+            and call[0][0].endswith("/catalogs")
+            and not call[0][0].endswith("/catalogs")
+            or "/catalogs/" in call[0][0]
         ]
-        
+
         # Filter more precisely: calls that have /catalogs/ in the middle (parent_id)
         subcatalog_calls = [
             call
             for call in mock_post.call_args_list
             if call[0][0].count("/catalogs") > 1  # More than one /catalogs in URL
         ]
-        
+
         assert len(subcatalog_calls) > 0
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")

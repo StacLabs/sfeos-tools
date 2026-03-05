@@ -15,21 +15,23 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
 
 
-def _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl):
-    """Helper function to create a catalog from a SKOS concept."""
+def _create_catalog(
+    subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl
+):
+    """Create a catalog from a SKOS concept."""
     stac_id = uri_to_stac_id[subject]
     title = str(g.value(subject, SKOS.prefLabel) or stac_id)
-    
+
     # Combine definition and modified date into the description
     definition = g.value(subject, SKOS.definition)
     modified = g.value(subject, DCT.modified)
-    
+
     desc = str(definition) if definition else f"ESA Earth Topic: {title}."
     if modified:
         desc += f" (Last modified: {modified})"
-    
+
     stac_links = []
-    
+
     # 1. Capture external vocabulary links
     match_types = {
         SKOS.exactMatch: "SKOS Exact Match",
@@ -42,7 +44,7 @@ def _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, ver
             stac_links.append(
                 {"rel": "related", "href": str(match_uri), "title": link_title}
             )
-    
+
     # 2. Capture internal horizontal links (skos:related)
     for related_subj in g.objects(subject, SKOS.related):
         related_stac_id = uri_to_stac_id.get(related_subj)
@@ -54,7 +56,7 @@ def _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, ver
                     "title": f"Related Concept: {related_stac_id.replace('-', ' ').title()}",
                 }
             )
-    
+
     # POST /catalogs
     catalog_payload = {
         "type": "Catalog",
@@ -64,9 +66,13 @@ def _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, ver
         "stac_version": "1.0.0",
         "links": stac_links,
     }
-    
+
     res = requests.post(
-        f"{stac_api_url}/catalogs", json=catalog_payload, headers=headers, auth=auth, verify=verify_ssl
+        f"{stac_api_url}/catalogs",
+        json=catalog_payload,
+        headers=headers,
+        auth=auth,
+        verify=verify_ssl,
     )
     if res.status_code in [201, 200, 409]:
         print(f"Created: {stac_id} ({len(stac_links)} metadata links)")
@@ -75,7 +81,11 @@ def _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, ver
 
 
 def ingest_from_xml(
-    xml_file: str, stac_api_url: str, user: str = None, password: str = None, use_ssl: bool = None
+    xml_file: str,
+    stac_api_url: str,
+    user: str = None,
+    password: str = None,
+    use_ssl: bool = None,
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
@@ -87,12 +97,12 @@ def ingest_from_xml(
         use_ssl: Optional SSL verification flag
     """
     headers = {"Content-Type": "application/json"}
-    
+
     # Prepare authentication if provided
     auth = None
     if user and password:
         auth = (user, password)
-    
+
     # Prepare SSL verification settings
     verify_ssl = True
     if use_ssl is False:
@@ -106,12 +116,12 @@ def ingest_from_xml(
     print("Pre-computing STAC IDs and hierarchy...")
     uri_to_stac_id = {}
     hierarchy_map = {}  # Maps child_uri -> parent_uri
-    
+
     for subject in g.subjects(RDF.type, SKOS.Concept):
         pref_label = g.value(subject, SKOS.prefLabel)
         title = str(pref_label) if pref_label else "Unnamed Concept"
         uri_to_stac_id[subject] = slugify(title)
-        
+
         # Build hierarchy from skos:broader relationships
         broader = g.value(subject, SKOS.broader)
         if broader:
@@ -123,28 +133,30 @@ def ingest_from_xml(
     for subject in g.subjects(RDF.type, SKOS.Concept):
         if subject not in hierarchy_map:
             root_catalogs.add(subject)
-    
+
     for subject in root_catalogs:
-        _create_catalog(subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl)
+        _create_catalog(
+            subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl
+        )
 
     # Pass 2: Create sub-catalogs under their parents
     print("\nCreating sub-catalogs...")
     for child_uri, parent_uri in hierarchy_map.items():
         parent_id = uri_to_stac_id.get(parent_uri)
         child_id = uri_to_stac_id.get(child_uri)
-        
+
         if parent_id and child_id:
             # Create the catalog under its parent
             title = str(g.value(child_uri, SKOS.prefLabel) or child_id)
             definition = g.value(child_uri, SKOS.definition)
             modified = g.value(child_uri, DCT.modified)
-            
+
             desc = str(definition) if definition else f"ESA Earth Topic: {title}."
             if modified:
                 desc += f" (Last modified: {modified})"
-            
+
             stac_links = []
-            
+
             # Add semantic links
             match_types = {
                 SKOS.exactMatch: "SKOS Exact Match",
@@ -157,7 +169,7 @@ def ingest_from_xml(
                     stac_links.append(
                         {"rel": "related", "href": str(match_uri), "title": link_title}
                     )
-            
+
             # Add related links
             for related_subj in g.objects(child_uri, SKOS.related):
                 related_stac_id = uri_to_stac_id.get(related_subj)
@@ -169,7 +181,7 @@ def ingest_from_xml(
                             "title": f"Related Concept: {related_stac_id.replace('-', ' ').title()}",
                         }
                     )
-            
+
             catalog_payload = {
                 "type": "Catalog",
                 "id": child_id,
@@ -178,18 +190,20 @@ def ingest_from_xml(
                 "stac_version": "1.0.0",
                 "links": stac_links,
             }
-            
+
             res = requests.post(
                 f"{stac_api_url}/catalogs/{parent_id}/catalogs",
                 json=catalog_payload,
                 headers=headers,
                 auth=auth,
-                verify=verify_ssl
+                verify=verify_ssl,
             )
             if res.status_code in [201, 200, 409]:
                 print(f"Created sub-catalog: {parent_id} -> {child_id}")
             else:
-                print(f"Failed to create sub-catalog {child_id} under {parent_id}: {res.text}")
+                print(
+                    f"Failed to create sub-catalog {child_id} under {parent_id}: {res.text}"
+                )
 
     print("\nStructural hierarchy established.")
 
