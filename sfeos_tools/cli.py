@@ -23,7 +23,7 @@ __version__ = _get_version("sfeos-tools")
 
 from .bbox_shape import run_add_bbox_shape
 from .catalog_ingestion import ingest_from_xml
-from .cli_options import database_options, stac_api_options
+from .cli_options import auth_options, database_options, stac_api_options
 from .data_loader import load_items
 from .reindex import run as unified_reindex_run
 
@@ -229,9 +229,9 @@ def load_data(stac_url: str, collection_id: str, use_bulk: bool, data_dir: str) 
     help="Path to RDF/XML file containing SKOS concepts",
 )
 @stac_api_options
-@database_options
+@auth_options
 def ingest_catalog(
-    xml_file: str, stac_url: str, host, port, use_ssl, user, password
+    xml_file: str, stac_url: str, use_ssl: bool, user: str, password: str
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 

@@ -96,6 +96,25 @@ sfeos-tools --version
 
 ## Commands
 
+### Standardized CLI Options
+
+The CLI tools use standardized options across commands for consistency:
+
+**Database Commands** (`add-bbox-shape`, `reindex`):
+- `--host`: Database host (default: localhost or ES_HOST env var)
+- `--port`: Database port (default: 9200 for ES, 9202 for OS, or ES_PORT env var)
+- `--use-ssl/--no-ssl`: SSL connection flag (default: true or ES_USE_SSL env var)
+- `--user`: Database username (default: ES_USER env var)
+- `--password`: Database password (default: ES_PASS env var)
+
+**STAC API Commands** (`load-data`, `ingest-catalog`, `viewer`):
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
+
+**Authentication Options** (optional for STAC API commands):
+- `--user`: Username for basic authentication
+- `--password`: Password for basic authentication
+- `--use-ssl/--no-ssl`: SSL verification flag
+
 ### add-bbox-shape
 
 Adds a `bbox_shape` field to existing collections for spatial search support. This migration is required for collections created before spatial search was added. Collections created or updated after this feature will automatically have the `bbox_shape` field.
@@ -150,11 +169,11 @@ Load STAC collections and items from local JSON files into a STAC API instance. 
 - Bulk loading STAC collections and items
 
 ```bash
-sfeos-tools load-data --base-url <stac-api-url> [options]
+sfeos-tools load-data --stac-url <stac-api-url> [options]
 ```
 
 Options:
-- `--base-url`: Base URL of the STAC API (required)
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
 - `--collection-id`: ID of the collection to create/update (default: test-collection)
 - `--data-dir`: Directory containing collection.json and feature collection files (default: sample_data/)
 - `--use-bulk`: Use bulk insert method for items (faster for large datasets)
@@ -168,17 +187,17 @@ Your data directory should contain:
 Examples:
 ```bash
 # Load data from default directory
-sfeos-tools load-data --base-url http://localhost:8080
+sfeos-tools load-data --stac-url http://localhost:8080
 
 # Load with custom collection ID and bulk insert
 sfeos-tools load-data \
-  --base-url http://localhost:8080 \
+  --stac-url http://localhost:8080 \
   --collection-id my-collection \
   --use-bulk
 
 # Load from custom directory
 sfeos-tools load-data \
-  --base-url http://localhost:8080 \
+  --stac-url http://localhost:8080 \
   --data-dir /path/to/stac/data \
   --collection-id production-data
 ```
