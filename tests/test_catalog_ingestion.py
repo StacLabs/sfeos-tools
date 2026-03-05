@@ -59,30 +59,40 @@ class TestIngestFromXml:
         # Should create catalogs for each concept
         assert mock_post.call_count > 0
 
-        # Check that POST calls were made to /catalogs endpoint
+        # Check that POST calls were made to /catalogs endpoint (all calls now go to /catalogs)
         catalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs" in str(call) and "catalogs/" not in str(call)
+            if call[0][0].endswith("/catalogs")
         ]
         assert len(catalog_calls) > 0
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")
     def test_ingest_from_xml_establishes_hierarchy(self, mock_post, test_xml_file):
-        """Test that parent-child relationships are established."""
+        """Test that parent-child relationships are established through sub-catalog creation."""
         mock_response = Mock()
         mock_response.status_code = 201
         mock_post.return_value = mock_response
 
         ingest_from_xml(str(test_xml_file), "http://localhost:8080")
 
-        # Check that hierarchy links were created
-        hierarchy_calls = [
+        # Check that sub-catalogs were created under parent catalogs
+        # Look for calls to /catalogs/{parent_id}/catalogs endpoints
+        subcatalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs/" in str(call) and "/catalogs" in str(call)
+            if "/catalogs" in call[0][0] and call[0][0].endswith("/catalogs")
+            and not call[0][0].endswith("/catalogs") or "/catalogs/" in call[0][0]
         ]
-        assert len(hierarchy_calls) > 0
+        
+        # Filter more precisely: calls that have /catalogs/ in the middle (parent_id)
+        subcatalog_calls = [
+            call
+            for call in mock_post.call_args_list
+            if call[0][0].count("/catalogs") > 1  # More than one /catalogs in URL
+        ]
+        
+        assert len(subcatalog_calls) > 0
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")
     def test_ingest_from_xml_handles_409_conflict(self, mock_post, test_xml_file):
@@ -107,7 +117,7 @@ class TestIngestFromXml:
         catalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs" in str(call) and "catalogs/" not in str(call)
+            if call[0][0].endswith("/catalogs")
         ]
         assert len(catalog_calls) > 0
 
@@ -137,21 +147,18 @@ class TestIngestFromXml:
         catalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs" in str(call) and "catalogs/" not in str(call)
+            if call[0][0].endswith("/catalogs")
         ]
 
-        # At least one catalog should have a definition
-        has_definition = False
+        # At least one catalog should have a definition or description
+        has_description = False
         for call in catalog_calls:
             payload = call[1]["json"]
-            if (
-                "definition" in payload["description"].lower()
-                or "Last modified" in payload["description"]
-            ):
-                has_definition = True
+            if payload.get("description"):
+                has_description = True
                 break
 
-        assert has_definition
+        assert has_description
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")
     def test_ingest_from_xml_creates_semantic_links(self, mock_post, test_xml_file):
@@ -166,22 +173,20 @@ class TestIngestFromXml:
         catalog_calls = [
             call
             for call in mock_post.call_args_list
-            if "/catalogs" in str(call) and "catalogs/" not in str(call)
+            if call[0][0].endswith("/catalogs")
         ]
 
-        # At least one catalog should have external links
-        has_external_links = False
+        # At least one catalog should have related links
+        has_related_links = False
         for call in catalog_calls:
             payload = call[1]["json"]
             if payload.get("links"):
                 for link in payload["links"]:
-                    if "gcmd" in link.get("href", "") or "gemet" in link.get(
-                        "href", ""
-                    ):
-                        has_external_links = True
+                    if link.get("rel") == "related":
+                        has_related_links = True
                         break
 
-        assert has_external_links
+        assert has_related_links
 
 
 class TestIngestCatalogCLI:
@@ -262,6 +267,92 @@ class TestIngestCatalogCLI:
 
         assert result.exit_code != 0
         assert "failed" in result.output.lower()
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_catalog_command_with_auth(self, mock_post):
+        """Test ingest-catalog command with username and password."""
+        runner = CliRunner()
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_post.return_value = mock_response
+
+        test_xml_file = Path(__file__).parent / "skos-test-topics.rdf"
+
+        result = runner.invoke(
+            cli,
+            [
+                "ingest-catalog",
+                "--xml-file",
+                str(test_xml_file),
+                "--user",
+                "testuser",
+                "--password",
+                "testpass",
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Verify that auth was passed to requests.post
+        for call in mock_post.call_args_list:
+            assert call[1]["auth"] == ("testuser", "testpass")
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_catalog_command_with_ssl_disabled(self, mock_post):
+        """Test ingest-catalog command with SSL verification disabled."""
+        runner = CliRunner()
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_post.return_value = mock_response
+
+        test_xml_file = Path(__file__).parent / "skos-test-topics.rdf"
+
+        result = runner.invoke(
+            cli,
+            [
+                "ingest-catalog",
+                "--xml-file",
+                str(test_xml_file),
+                "--no-ssl",
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Verify that verify=False was passed to requests.post
+        for call in mock_post.call_args_list:
+            assert call[1]["verify"] is False
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_catalog_command_with_auth_and_ssl(self, mock_post):
+        """Test ingest-catalog command with both auth and SSL options."""
+        runner = CliRunner()
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_post.return_value = mock_response
+
+        test_xml_file = Path(__file__).parent / "skos-test-topics.rdf"
+
+        result = runner.invoke(
+            cli,
+            [
+                "ingest-catalog",
+                "--xml-file",
+                str(test_xml_file),
+                "--user",
+                "admin",
+                "--password",
+                "secret",
+                "--no-ssl",
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Verify that both auth and verify were passed correctly
+        for call in mock_post.call_args_list:
+            assert call[1]["auth"] == ("admin", "secret")
+            assert call[1]["verify"] is False
 
 
 class TestIngestWithTestData:

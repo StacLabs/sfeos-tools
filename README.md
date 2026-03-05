@@ -29,6 +29,7 @@ CLI tools for managing [stac-fastapi-elasticsearch-opensearch](https://github.co
   - [add-bbox-shape](#add-bbox-shape)
   - [reindex](#reindex)
   - [load-data](#load-data)
+  - [ingest-catalog](#ingest-catalog)
   - [viewer](#viewer)
 - [Development](#development)
 - [License](#license)
@@ -180,6 +181,43 @@ sfeos-tools load-data \
   --base-url http://localhost:8080 \
   --data-dir /path/to/stac/data \
   --collection-id production-data
+```
+
+### ingest-catalog
+
+Ingest SKOS/RDF-XML files to create STAC catalogs and sub-catalogs. This command parses RDF/XML files containing SKOS concepts and creates a hierarchical catalog structure in the STAC API. It handles:
+- Creating catalogs from SKOS concepts
+- Establishing parent-child relationships (skos:narrower)
+- Preserving semantic links (skos:related, skos:exactMatch, etc.)
+- Including metadata from definitions and modification dates
+
+```bash
+sfeos-tools ingest-catalog --xml-file <path-to-rdf-xml> [options]
+```
+
+Options:
+- `--xml-file`: Path to RDF/XML file containing SKOS concepts (required)
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
+- `--user`: Username for basic authentication (optional)
+- `--password`: Password for basic authentication (optional)
+- `--use-ssl/--no-ssl`: Enable or disable SSL verification (optional)
+
+Examples:
+```bash
+# Ingest test data from the tests directory (uses default localhost:8080)
+sfeos-tools ingest-catalog --xml-file tests/skos-test-topics.rdf
+
+# Ingest with explicit STAC API URL
+sfeos-tools ingest-catalog --xml-file thesaurus.rdf --stac-url http://localhost:8080
+
+# Ingest with basic authentication
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --user myuser --password mypass
+
+# Ingest with SSL verification disabled
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --no-ssl
+
+# Ingest with authentication and custom SSL settings
+sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com --user admin --password secret --no-ssl
 ```
 
 ### viewer
