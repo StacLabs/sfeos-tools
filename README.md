@@ -29,6 +29,7 @@ CLI tools for managing [stac-fastapi-elasticsearch-opensearch](https://github.co
   - [add-bbox-shape](#add-bbox-shape)
   - [reindex](#reindex)
   - [load-data](#load-data)
+  - [ingest-catalog](#ingest-catalog)
   - [viewer](#viewer)
 - [Development](#development)
 - [License](#license)
@@ -95,6 +96,25 @@ sfeos-tools --version
 
 ## Commands
 
+### Standardized CLI Options
+
+The CLI tools use standardized options across commands for consistency:
+
+**Database Commands** (`add-bbox-shape`, `reindex`):
+- `--host`: Database host (default: localhost or ES_HOST env var)
+- `--port`: Database port (default: 9200 for ES, 9202 for OS, or ES_PORT env var)
+- `--use-ssl/--no-ssl`: SSL connection flag (default: true or ES_USE_SSL env var)
+- `--user`: Database username (default: ES_USER env var)
+- `--password`: Database password (default: ES_PASS env var)
+
+**STAC API Commands** (`load-data`, `ingest-catalog`, `viewer`):
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
+
+**Authentication Options** (optional for STAC API commands):
+- `--user`: Username for basic authentication
+- `--password`: Password for basic authentication
+- `--use-ssl/--no-ssl`: SSL verification flag
+
 ### add-bbox-shape
 
 Adds a `bbox_shape` field to existing collections for spatial search support. This migration is required for collections created before spatial search was added. Collections created or updated after this feature will automatically have the `bbox_shape` field.
@@ -149,11 +169,11 @@ Load STAC collections and items from local JSON files into a STAC API instance. 
 - Bulk loading STAC collections and items
 
 ```bash
-sfeos-tools load-data --base-url <stac-api-url> [options]
+sfeos-tools load-data --stac-url <stac-api-url> [options]
 ```
 
 Options:
-- `--base-url`: Base URL of the STAC API (required)
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
 - `--collection-id`: ID of the collection to create/update (default: test-collection)
 - `--data-dir`: Directory containing collection.json and feature collection files (default: sample_data/)
 - `--use-bulk`: Use bulk insert method for items (faster for large datasets)
@@ -167,19 +187,56 @@ Your data directory should contain:
 Examples:
 ```bash
 # Load data from default directory
-sfeos-tools load-data --base-url http://localhost:8080
+sfeos-tools load-data --stac-url http://localhost:8080
 
 # Load with custom collection ID and bulk insert
 sfeos-tools load-data \
-  --base-url http://localhost:8080 \
+  --stac-url http://localhost:8080 \
   --collection-id my-collection \
   --use-bulk
 
 # Load from custom directory
 sfeos-tools load-data \
-  --base-url http://localhost:8080 \
+  --stac-url http://localhost:8080 \
   --data-dir /path/to/stac/data \
   --collection-id production-data
+```
+
+### ingest-catalog
+
+Ingest SKOS/RDF-XML files to create STAC catalogs and sub-catalogs. This command parses RDF/XML files containing SKOS concepts and creates a hierarchical catalog structure in the STAC API. It handles:
+- Creating catalogs from SKOS concepts
+- Establishing parent-child relationships (skos:narrower)
+- Preserving semantic links (skos:related, skos:exactMatch, etc.)
+- Including metadata from definitions and modification dates
+
+```bash
+sfeos-tools ingest-catalog --xml-file <path-to-rdf-xml> [options]
+```
+
+Options:
+- `--xml-file`: Path to RDF/XML file containing SKOS concepts (required)
+- `--stac-url`: STAC API base URL (default: http://localhost:8080)
+- `--user`: Username for basic authentication (optional)
+- `--password`: Password for basic authentication (optional)
+- `--use-ssl/--no-ssl`: Enable or disable SSL verification (optional)
+
+Examples:
+```bash
+# Ingest test data from the tests directory (uses default localhost:8080)
+sfeos-tools ingest-catalog --xml-file tests/skos-test-topics.rdf
+
+# Ingest with explicit STAC API URL
+sfeos-tools ingest-catalog --xml-file thesaurus.rdf --stac-url http://localhost:8080
+
+# Ingest with basic authentication
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --user myuser --password mypass
+
+# Ingest with SSL verification disabled
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --no-ssl
+
+# Ingest with authentication and custom SSL settings
+sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com --user admin --password secret --no-ssl
 ```
 
 ### viewer

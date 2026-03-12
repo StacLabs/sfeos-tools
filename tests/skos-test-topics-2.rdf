@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:schema="http://schema.org/"
+	xmlns:gcmd="https://gcmd.earthdata.nasa.gov/kms/concept/"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:org="http://www.w3.org/ns/org#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:skosthes="http://purl.org/iso25964/skos-thes#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:qb="http://purl.org/linked-data/cube#"
+	xmlns:dct="http://purl.org/dc/terms/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:sh="http://www.w3.org/ns/shacl#"
+	xmlns:inspire="https://www.eionet.europa.eu/gemet/en/inspire-theme/"
+	xmlns:dcat="http://www.w3.org/ns/dcat#"
+	xmlns:prov="http://www.w3.org/ns/prov#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:base="https://mock.example.int/concept/"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	xmlns:skosxl="http://www.w3.org/2008/05/skos-xl#"
+	xmlns:euvoc="http://publications.europa.eu/ontology/euvoc#">
+
+<rdf:Description rdf:about="https://mock.example.int/concepts/concept_scheme/culinary-topics">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+	<dct:title xml:lang="en">Mock Thesaurus</dct:title>
+	<rdfs:label xml:lang="en">Culinary Topics</rdfs:label>
+	<dct:description xml:lang="en">A fictional taxonomy for testing SKOS parsing and STAC Multi-Tenant Catalogs.</dct:description>
+	<owl:versionInfo xml:lang="en">1.0</owl:versionInfo>
+	<dct:modified xml:lang="en">2026-03-03</dct:modified>
+	<dct:rights xml:lang="en">Open Source Testing Data.</dct:rights>
+	<skos:hasTopConcept rdf:resource="https://mock.example.int/concept/11111111-1111-1111-1111-111111111111"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.example.int/concept/11111111-1111-1111-1111-111111111111">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel xml:lang="en">Food Topic</skos:prefLabel>
+	<skos:narrower rdf:resource="https://mock.example.int/concept/22222222-2222-2222-2222-222222222222"/>
+	<skos:narrower rdf:resource="https://mock.example.int/concept/33333333-3333-3333-3333-333333333333"/>
+	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+	<skos:topConceptOf rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.example.int/concept/22222222-2222-2222-2222-222222222222">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel xml:lang="en">Desserts</skos:prefLabel>
+	<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-03</dct:modified>
+	<skos:broader rdf:resource="https://mock.example.int/concept/11111111-1111-1111-1111-111111111111"/>
+	<skos:exactMatch rdf:resource="https://gcmd.mock.data/kms/concept/mock-desserts"/>
+	<skos:narrower rdf:resource="https://mock.example.int/concept/44444444-4444-4444-4444-444444444444"/>
+	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.example.int/concept/33333333-3333-3333-3333-333333333333">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel xml:lang="en">Beverages</skos:prefLabel>
+	<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-03</dct:modified>
+	<skos:broader rdf:resource="https://mock.example.int/concept/11111111-1111-1111-1111-111111111111"/>
+	<skos:exactMatch rdf:resource="https://gcmd.mock.data/kms/concept/mock-beverages"/>
+	<skos:narrower rdf:resource="https://mock.example.int/concept/55555555-5555-5555-5555-555555555555"/>
+	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.example.int/concept/44444444-4444-4444-4444-444444444444">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel xml:lang="en">Cakes</skos:prefLabel>
+	<skos:definition xml:lang="en">A sweet baked food made from a dough or thick batter.</skos:definition>
+	<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-03</dct:modified>
+	<skos:broader rdf:resource="https://mock.example.int/concept/22222222-2222-2222-2222-222222222222"/>
+    <skos:related rdf:resource="https://mock.example.int/concept/55555555-5555-5555-5555-555555555555"/>
+	<skos:closeMatch rdf:resource="https://www.mock-gemet.eu/concept/cake-123"/>
+	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.example.int/concept/55555555-5555-5555-5555-555555555555">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel xml:lang="en">Coffee</skos:prefLabel>
+	<skos:definition xml:lang="en">A brewed drink prepared from roasted coffee beans.</skos:definition>
+	<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-03</dct:modified>
+	<skos:broader rdf:resource="https://mock.example.int/concept/33333333-3333-3333-3333-333333333333"/>
+    <skos:related rdf:resource="https://mock.example.int/concept/44444444-4444-4444-4444-444444444444"/>
+	<skos:closeMatch rdf:resource="https://www.mock-gemet.eu/concept/coffee-456"/>
+	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/culinary-topics"/>
+</rdf:Description>
+
+</rdf:RDF>
