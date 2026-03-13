@@ -163,6 +163,8 @@ sfeos-tools reindex --backend opensearch --yes
 
 ### load-data
 
+**Note:** to enable this functionality, the `ENABLE_CATALOGS_ROUTE` env var needs to be set in SFEOS. 
+
 Load STAC collections and items from local JSON files into a STAC API instance. This command is useful for:
 - Populating a new STAC API deployment with test data
 - Migrating data between STAC API instances
