@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:schema="http://schema.org/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+<rdf:Description rdf:about="https://mock.gis.int/concepts/concept_scheme/traffic-signs">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+    <dct:title xml:lang="en">GIS Traffic Signs Taxonomy</dct:title>
+    <dct:description xml:lang="en">A deep, poly-hierarchical taxonomy of road traffic signs for testing STAC Multi-Tenant Catalogs and DAG resolution.</dct:description>
+    <owl:versionInfo xml:lang="en">1.0</owl:versionInfo>
+    <dct:modified xml:lang="en">2026-03-16</dct:modified>
+    <skos:hasTopConcept rdf:resource="https://mock.gis.int/concept/traffic-signs"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/traffic-signs">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Traffic Signs</skos:prefLabel>
+    <skos:definition xml:lang="en">Signs erected at the side of or above roads to give instructions or provide information to road users.</skos:definition>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/regulatory-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/warning-signs"/>
+    <skos:topConceptOf rdf:resource="https://mock.gis.int/concepts/concept_scheme/traffic-signs"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/regulatory-signs">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Regulatory Signs</skos:prefLabel>
+    <skos:definition xml:lang="en">Signs used to indicate or reinforce traffic laws, regulations or requirements.</skos:definition>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/traffic-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/prohibitory-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/mandatory-signs"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/warning-signs">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Warning Signs</skos:prefLabel>
+    <skos:definition xml:lang="en">Signs that indicate a hazard ahead on the road.</skos:definition>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/traffic-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/school-zones"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/prohibitory-signs">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Prohibitory Signs</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/regulatory-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/speed-limits"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/turn-prohibitions"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/school-zones">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">School Zone Warnings</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/warning-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/school-zone-speed"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/speed-limits">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Speed Limit Signs</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/prohibitory-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/max-speed"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/school-zone-speed"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/turn-prohibitions">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Turn Prohibition Signs</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/prohibitory-signs"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/no-u-turn"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/max-speed">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Maximum Speed Limits</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/speed-limits"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/speed-50"/>
+    <skos:narrower rdf:resource="https://mock.gis.int/concept/speed-100"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/school-zone-speed">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">School Zone Speed Limit</skos:prefLabel>
+    <skos:definition xml:lang="en">A regulatory speed limit that only applies during school hours.</skos:definition>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/speed-limits"/>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/school-zones"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/no-u-turn">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">No U-Turn</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/turn-prohibitions"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/speed-50">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">50 km/h Zone</skos:prefLabel>
+    <skos:definition xml:lang="en">Standard urban area maximum speed limit.</skos:definition>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/max-speed"/>
+    
+    <skos:related rdf:resource="https://mock.gis.int/concept/speed-camera-warning"/>
+    
+    <skos:exactMatch rdf:resource="https://wiki.openstreetmap.org/wiki/Tag:maxspeed=50"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/speed-100">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">100 km/h Zone</skos:prefLabel>
+    <skos:definition xml:lang="en">Standard highway maximum speed limit.</skos:definition>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/max-speed"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://mock.gis.int/concept/speed-camera-warning">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Speed Camera Warning</skos:prefLabel>
+    <skos:broader rdf:resource="https://mock.gis.int/concept/warning-signs"/>
+    <skos:related rdf:resource="https://mock.gis.int/concept/speed-50"/>
+</rdf:Description>
+
+</rdf:RDF>
