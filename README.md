@@ -25,6 +25,7 @@ CLI tools for managing [stac-fastapi-elasticsearch-opensearch](https://github.co
   - [For Viewer](#for-viewer)
   - [For Development](#for-development-both-backends)
 - [Usage](#usage)
+- [Interactive Demo](#interactive-demo-skos-to-stac)
 - [Commands](#commands)
   - [add-bbox-shape](#add-bbox-shape)
   - [reindex](#reindex)
@@ -93,6 +94,18 @@ sfeos-tools --help
 # View version
 sfeos-tools --version
 ```
+
+## Interactive Demo: SKOS to STAC
+
+Want to see the Multi-Tenant Catalogs extension and the `ingest-catalog` command in action? Check out our interactive Jupyter Notebook tutorial:
+
+📓 **[SKOS-catalogs-ingestion-demo.ipynb](./SKOS-catalogs-ingestion-demo.ipynb)**
+
+This notebook walks through a real-world GIS use case (a Traffic Signs taxonomy) and demonstrates:
+- **Automated Semantic Ingestion:** Translating a SKOS RDF file directly into a STAC catalog hierarchy.
+- **Poly-hierarchy (DAG):** Discovering a single spatial asset across multiple departmental catalogs (e.g., Regulatory vs. Warning signs).
+- **Contextual Breadcrumbs:** How SFEOS dynamically rewrites `rel="parent"` and `rel="child"` links based on your navigation path.
+- **Data Safety:** Deleting virtual organizational containers without destroying the underlying STAC features.
 
 ## Commands
 
@@ -229,7 +242,7 @@ Examples:
 sfeos-tools ingest-catalog --xml-file tests/skos-test-topics.rdf
 
 # Ingest with explicit STAC API URL
-sfeos-tools ingest-catalog --xml-file thesaurus.rdf --stac-url http://localhost:8080
+sfeos-tools ingest-catalog --xml-file traffic-signs.rdf --stac-url http://localhost:8080
 
 # Ingest with basic authentication
 sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --user myuser --password mypass

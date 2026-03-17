@@ -6,6 +6,10 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+### Added
+
+- Added SKOS/RDF-XML demo notebook with example traffic signs taxonomy
+
 ## [v0.4.0] - 2026-03-14
 
 ### Added
