@@ -99,7 +99,7 @@ sfeos-tools --version
 
 Want to see the Multi-Tenant Catalogs extension and the `ingest-catalog` command in action? Check out our interactive Jupyter Notebook tutorial:
 
-📓 **[SKOS-catalogs-ingestion-demo.ipynb](./SKOS-catalogs-ingestion-demo.ipynb)**
+📓 **[SKOS-catalogs-ingestion-demo.ipynb](./demo-notebooks/SKOS-catalogs-ingestion-demo.ipynb)**
 
 This notebook walks through a real-world GIS use case (a Traffic Signs taxonomy) and demonstrates:
 - **Automated Semantic Ingestion:** Translating a SKOS RDF file directly into a STAC catalog hierarchy.
@@ -242,7 +242,7 @@ Examples:
 sfeos-tools ingest-catalog --xml-file tests/skos-test-topics.rdf
 
 # Ingest with explicit STAC API URL
-sfeos-tools ingest-catalog --xml-file traffic-signs.rdf --stac-url http://localhost:8080
+sfeos-tools ingest-catalog --xml-file demo-notebooks/traffic-signs.rdf --stac-url http://localhost:8080
 
 # Ingest with basic authentication
 sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --user myuser --password mypass
