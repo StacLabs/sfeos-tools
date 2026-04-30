@@ -362,9 +362,9 @@ sfeos-tools crawl-graph [options]
 ```
 
 Options:
-- `--url`: Base URL of the SFEOS API (default: http://localhost:8080)
+- `--stac-url`: Base URL of the SFEOS API (default: http://localhost:8080, env: STAC_URL)
 - `--output`: Output format: `text` for hierarchical tree view or `json` for graph data (default: text)
-- `--use-ssl/--no-ssl`: SSL connection flag (default: true)
+- `--use-ssl/--no-ssl`: SSL connection flag (default: ES_USE_SSL env var)
 - `--user`: Username for basic authentication (default: ES_USER env var)
 - `--password`: Password for basic authentication (default: ES_PASS env var)
 - `--api-key`: API key for authentication (default: ES_API_KEY env var)
@@ -386,19 +386,19 @@ Examples:
 sfeos-tools crawl-graph
 
 # Crawl a custom SFEOS instance
-sfeos-tools crawl-graph --url https://my-sfeos-api.com
+sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com
 
 # Get JSON output for programmatic use
-sfeos-tools crawl-graph --url http://localhost:8080 --output json
+sfeos-tools crawl-graph --stac-url http://localhost:8080 --output json
 
 # Crawl custom instance and output as JSON
-sfeos-tools crawl-graph --url https://my-sfeos-api.com --output json
+sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --output json
 
 # Crawl with API key authentication
-sfeos-tools crawl-graph --url https://my-sfeos-api.com --api-key my-key --output json
+sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --api-key my-key --output json
 
 # Crawl with basic authentication
-sfeos-tools crawl-graph --url https://my-sfeos-api.com --user admin --password secret
+sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --user admin --password secret
 ```
 
 **Example Output (Text Format):**
@@ -440,13 +440,13 @@ sfeos-tools visualize-graph [options]
 ```
 
 Options:
-- `--url`: Base URL of the SFEOS API (default: http://localhost:8080)
+- `--stac-url`: Base URL of the SFEOS API (default: http://localhost:8080, env: STAC_URL)
 - `--layout`: Graph layout style (default: hierarchical)
   - `hierarchical`: Tree layout flowing top-to-bottom (best for DAGs)
   - `hierarchical-lr`: Tree layout flowing left-to-right (alternative hierarchical view)
   - `force`: Force-directed layout using ForceAtlas2 algorithm (organic, physics-based)
   - `spring`: Spring-based layout using Barnes-Hut algorithm (natural node spreading)
-- `--use-ssl/--no-ssl`: SSL connection flag (default: true)
+- `--use-ssl/--no-ssl`: SSL connection flag (default: ES_USE_SSL env var)
 - `--user`: Username for basic authentication (default: ES_USER env var)
 - `--password`: Password for basic authentication (default: ES_PASS env var)
 - `--api-key`: API key for authentication (default: ES_API_KEY env var)
@@ -477,16 +477,16 @@ sfeos-tools visualize-graph --layout force
 sfeos-tools visualize-graph --layout spring
 
 # Visualize a custom SFEOS instance with hierarchical layout
-sfeos-tools visualize-graph --url https://my-sfeos-api.com
+sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com
 
 # Visualize custom instance with left-to-right layout
-sfeos-tools visualize-graph --url https://my-sfeos-api.com --layout hierarchical-lr
+sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --layout hierarchical-lr
 
 # Visualize with API key authentication
-sfeos-tools visualize-graph --url https://my-sfeos-api.com --api-key my-key
+sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --api-key my-key
 
 # Visualize with basic authentication
-sfeos-tools visualize-graph --url https://my-sfeos-api.com --user admin --password secret
+sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --user admin --password secret
 ```
 
 **Output:**

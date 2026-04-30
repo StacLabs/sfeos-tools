@@ -6,6 +6,10 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+### Changed
+
+- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency.
+
 ## [v0.7.0] - 2026-04-30
 
 ### Added
