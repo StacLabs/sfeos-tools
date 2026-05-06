@@ -42,6 +42,7 @@ from .cli_options import (
     auth_options,
     configure_session_auth,
     database_options,
+    lang_options,
     prepare_auth_headers_and_verify,
     set_es_env_vars,
     stac_api_options,
@@ -267,8 +268,9 @@ def load_data(
 )
 @stac_api_options
 @auth_options
+@lang_options
 def ingest_catalog(
-    xml_file: str, stac_url: str, use_ssl: bool, user: str, password: str, api_key: str
+    xml_file: str, stac_url: str, use_ssl: bool, user: str, password: str, api_key: str, lang: str
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
@@ -294,6 +296,7 @@ def ingest_catalog(
             password=password,
             use_ssl=use_ssl,
             api_key=api_key,
+            lang=lang
         )
         click.echo(
             click.style("✓ Catalog ingestion completed successfully", fg="green")
@@ -518,8 +521,8 @@ def crawl_graph(
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-
-    catalogs_endpoint = urljoin(url, "/catalogs?limit=100")
+    url = url if url.endswith("/") else url + "/"
+    catalogs_endpoint = urljoin(url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
@@ -537,7 +540,7 @@ def crawl_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(url, f"/catalogs/{current_id}/children")
+                children_endpoint = urljoin(url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -559,7 +562,7 @@ def crawl_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    url, f"/catalogs/{current_id}/collections"
+                    url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"
@@ -690,8 +693,8 @@ def visualize_graph(
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-
-    catalogs_endpoint = urljoin(url, "/catalogs?limit=100")
+    url = url if url.endswith("/") else url + "/"
+    catalogs_endpoint = urljoin(url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
@@ -714,7 +717,7 @@ def visualize_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(url, f"/catalogs/{current_id}/children")
+                children_endpoint = urljoin(url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -736,7 +739,7 @@ def visualize_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    url, f"/catalogs/{current_id}/collections"
+                    url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"

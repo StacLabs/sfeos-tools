@@ -14,16 +14,24 @@ def slugify(text: str) -> str:
     text = text.lower()
     return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
 
+def get_lang_literal(g, subject, predicate, lang):
+    """Return only specified language literal for a predicate, fallback to None."""
+    for obj in g.objects(subject, predicate):
+        if hasattr(obj, "language") and obj.language == lang:
+            return str(obj)
+        elif not hasattr(obj, "language") and lang is None:
+            return str(obj)
+    return None
 
 def _create_catalog(
-    subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl
+    subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl, lang
 ):
     """Create a catalog from a SKOS concept."""
     stac_id = uri_to_stac_id[subject]
-    title = str(g.value(subject, SKOS.prefLabel) or stac_id)
+    title = get_lang_literal(g, subject, SKOS.prefLabel, lang) or stac_id
 
     # Combine definition and modified date into the description
-    definition = g.value(subject, SKOS.definition)
+    definition = get_lang_literal(g, subject, SKOS.definition, lang)
     modified = g.value(subject, DCT.modified)
 
     desc = str(definition) if definition else f"ESA Earth Topic: {title}."
@@ -32,7 +40,10 @@ def _create_catalog(
 
     stac_links = []
 
-    # 1. Capture external vocabulary links
+    # 1. Capture concept url as SKOS Exact Match
+    stac_links.append({"rel": "related", "href": str(subject), "title": "SKOS Exact Match"})  
+
+    # 2. Capture external vocabulary links
     match_types = {
         SKOS.exactMatch: "SKOS Exact Match",
         SKOS.closeMatch: "SKOS Close Match",
@@ -45,7 +56,7 @@ def _create_catalog(
                 {"rel": "related", "href": str(match_uri), "title": link_title}
             )
 
-    # 2. Capture internal horizontal links (skos:related)
+    # 3. Capture internal horizontal links (skos:related)
     for related_subj in g.objects(subject, SKOS.related):
         related_stac_id = uri_to_stac_id.get(related_subj)
         if related_stac_id:
@@ -87,6 +98,7 @@ def ingest_from_xml(
     password: str = None,
     use_ssl: bool = None,
     api_key: str = None,
+    lang: str = None,
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
@@ -97,7 +109,7 @@ def ingest_from_xml(
         password: Optional password for basic authentication
         use_ssl: Optional SSL verification flag
         api_key: Optional API key for authentication
-
+        lang: Optional language for extraction of literals (e.g. "en")
     Raises:
         ValueError: If both basic auth (user/password) and API key are provided
     """
@@ -131,7 +143,7 @@ def ingest_from_xml(
     hierarchy_map = {}  # Maps child_uri -> [parent_uris] (supports poly-hierarchy)
 
     for subject in g.subjects(RDF.type, SKOS.Concept):
-        pref_label = g.value(subject, SKOS.prefLabel)
+        pref_label = get_lang_literal(g, subject, SKOS.prefLabel, lang)
         title = str(pref_label) if pref_label else "Unnamed Concept"
         uri_to_stac_id[subject] = slugify(title)
 
@@ -149,7 +161,7 @@ def ingest_from_xml(
 
     for subject in root_catalogs:
         _create_catalog(
-            subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl
+            subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl, lang
         )
 
     # Pass 2: Create sub-catalogs under their parents (supports poly-hierarchy)
@@ -160,8 +172,8 @@ def ingest_from_xml(
             continue
 
         # Get child metadata once (reused for all parents)
-        title = str(g.value(child_uri, SKOS.prefLabel) or child_id)
-        definition = g.value(child_uri, SKOS.definition)
+        title = get_lang_literal(g, child_uri, SKOS.prefLabel, lang)
+        definition = get_lang_literal(g, child_uri, SKOS.definition, lang)
         modified = g.value(child_uri, DCT.modified)
 
         desc = str(definition) if definition else f"ESA Earth Topic: {title}."
@@ -169,6 +181,9 @@ def ingest_from_xml(
             desc += f" (Last modified: {modified})"
 
         stac_links = []
+
+        # 1. Capture concept url as SKOS Exact Match
+        stac_links.append({"rel": "related", "href": str(subject), "title": "SKOS Exact Match"}) 
 
         # Add semantic links
         match_types = {

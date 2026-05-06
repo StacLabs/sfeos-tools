@@ -6,6 +6,15 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+### Added
+
+- Language option is added to ingest-catalog CLI command to filter ingestion based on language when the rdf/xml file is multilingual.
+- Added SKOS concept url as exact match link for tracability
+
+### Updated
+
+- Fixed urljoin to keep routes when appending addresses.
+
 ## [v0.7.0] - 2026-04-30
 
 ### Added
