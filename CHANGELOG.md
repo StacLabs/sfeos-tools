@@ -8,7 +8,7 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ### Changed
 
-- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency.
+- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency. ([#15](https://github.com/stac-utils/stac-fastapi-pgstac/pull/15))
 
 ### Added
 
