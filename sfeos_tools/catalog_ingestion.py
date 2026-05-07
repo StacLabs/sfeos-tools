@@ -16,12 +16,17 @@ def slugify(text: str) -> str:
 
 
 def get_lang_literal(g, subject, predicate, lang):
-    """Return only specified language literal for a predicate, fallback to None."""
+    """Return only specified language literal for a predicate, fallback to first available."""
+    # If no language is specified, retain the original behavior and grab the first available value
+    if lang is None:
+        val = g.value(subject, predicate)
+        return str(val) if val else None
+
+    # If a language IS specified, search for it
     for obj in g.objects(subject, predicate):
         if hasattr(obj, "language") and obj.language == lang:
             return str(obj)
-        elif not hasattr(obj, "language") and lang is None:
-            return str(obj)
+
     return None
 
 
