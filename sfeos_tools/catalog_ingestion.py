@@ -41,7 +41,7 @@ def _create_catalog(
     stac_links = []
 
     # 1. Capture concept url as SKOS Exact Match
-    stac_links.append({"rel": "related", "href": str(subject), "title": "SKOS Exact Match"})  
+    stac_links.append({"rel": "alternate", "href": str(subject), "title": "SKOS Exact Match"})  
 
     # 2. Capture external vocabulary links
     match_types = {
@@ -183,7 +183,7 @@ def ingest_from_xml(
         stac_links = []
 
         # 1. Capture concept url as SKOS Exact Match
-        stac_links.append({"rel": "related", "href": str(subject), "title": "SKOS Exact Match"}) 
+        stac_links.append({"rel": "alternate", "href": str(child_uri), "title": "SKOS Exact Match"}) 
 
         # Add semantic links
         match_types = {
