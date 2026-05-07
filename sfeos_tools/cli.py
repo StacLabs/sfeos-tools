@@ -552,9 +552,7 @@ def crawl_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(
-                    stac_url, f"/catalogs/{current_id}/children"
-                )
+                children_endpoint = urljoin(stac_url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -576,7 +574,7 @@ def crawl_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    stac_url, f"/catalogs/{current_id}/collections"
+                    stac_url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"
@@ -727,9 +725,7 @@ def visualize_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(
-                    stac_url, f"/catalogs/{current_id}/children"
-                )
+                children_endpoint = urljoin(stac_url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -751,7 +747,7 @@ def visualize_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    stac_url, f"/catalogs/{current_id}/collections"
+                    stac_url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"
