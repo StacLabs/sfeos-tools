@@ -104,6 +104,7 @@ def stac_api_options(f):
     )(f)
     return f
 
+
 def lang_options(f):
     """Add language option to CLI command.
 
@@ -117,6 +118,7 @@ def lang_options(f):
         help="Language of raw data (default: None)",
     )(f)
     return f
+
 
 def set_es_env_vars(
     host=None, port=None, use_ssl=None, user=None, password=None, api_key=None

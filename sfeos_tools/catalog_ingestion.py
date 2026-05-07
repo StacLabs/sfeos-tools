@@ -14,6 +14,7 @@ def slugify(text: str) -> str:
     text = text.lower()
     return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
 
+
 def get_lang_literal(g, subject, predicate, lang):
     """Return only specified language literal for a predicate, fallback to None."""
     for obj in g.objects(subject, predicate):
@@ -22,6 +23,7 @@ def get_lang_literal(g, subject, predicate, lang):
         elif not hasattr(obj, "language") and lang is None:
             return str(obj)
     return None
+
 
 def _create_catalog(
     subject, g, uri_to_stac_id, stac_api_url, headers, auth, verify_ssl, lang
@@ -41,7 +43,9 @@ def _create_catalog(
     stac_links = []
 
     # 1. Capture concept url as SKOS Exact Match
-    stac_links.append({"rel": "alternate", "href": str(subject), "title": "SKOS Exact Match"})  
+    stac_links.append(
+        {"rel": "alternate", "href": str(subject), "title": "SKOS Exact Match"}
+    )
 
     # 2. Capture external vocabulary links
     match_types = {
@@ -183,7 +187,9 @@ def ingest_from_xml(
         stac_links = []
 
         # 1. Capture concept url as SKOS Exact Match
-        stac_links.append({"rel": "alternate", "href": str(child_uri), "title": "SKOS Exact Match"}) 
+        stac_links.append(
+            {"rel": "alternate", "href": str(child_uri), "title": "SKOS Exact Match"}
+        )
 
         # Add semantic links
         match_types = {

@@ -270,7 +270,13 @@ def load_data(
 @auth_options
 @lang_options
 def ingest_catalog(
-    xml_file: str, stac_url: str, use_ssl: bool, user: str, password: str, api_key: str, lang: str
+    xml_file: str,
+    stac_url: str,
+    use_ssl: bool,
+    user: str,
+    password: str,
+    api_key: str,
+    lang: str,
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
@@ -296,7 +302,7 @@ def ingest_catalog(
             password=password,
             use_ssl=use_ssl,
             api_key=api_key,
-            lang=lang
+            lang=lang,
         )
         click.echo(
             click.style("✓ Catalog ingestion completed successfully", fg="green")
