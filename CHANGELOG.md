@@ -10,6 +10,17 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 - Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency.
 
+### Added
+
+- Language option is added to ingest-catalog CLI command to filter ingestion based on language when the rdf/xml file is multilingual. ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
+- Added SKOS concept url as exact match link for tracability ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
+- Added tests for new `--lang` option and chane to use `alternate` links. ([#17](https://github.com/stac-utils/stac-fastapi-pgstac/pull/17))
+
+### Updated
+
+- Fixed urljoin to keep routes when appending addresses. ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
+- Readme it document new `--lang` option ([#17](https://github.com/stac-utils/stac-fastapi-pgstac/pull/17))
+
 ## [v0.7.0] - 2026-04-30
 
 ### Added

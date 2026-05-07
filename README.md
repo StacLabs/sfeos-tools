@@ -319,10 +319,15 @@ sfeos-tools ingest-catalog --xml-file <path-to-rdf-xml> [options]
 Options:
 - `--xml-file`: Path to RDF/XML file containing SKOS concepts (required)
 - `--stac-url`: STAC API base URL (default: http://localhost:8080)
+- `--lang`: Language code to filter multilingual RDF labels (e.g., `en`, `fr`, `es`). If not specified, the first available label is used (default: None)
 - `--user`: Username for basic authentication (optional)
 - `--password`: Password for basic authentication (optional)
 - `--api-key`: API key for authentication (optional)
 - `--use-ssl/--no-ssl`: Enable or disable SSL verification (optional)
+
+**Language Filtering:**
+
+The `--lang` option allows you to specify which language to extract from multilingual RDF files. If your RDF file contains labels in multiple languages (e.g., `<skos:prefLabel xml:lang="en">Observation Domain</skos:prefLabel>`), you can filter to a specific language. If `--lang` is omitted, the tool uses the first available label regardless of language, ensuring robust handling of both monolingual and multilingual RDF files.
 
 Examples:
 ```bash
@@ -331,6 +336,12 @@ sfeos-tools ingest-catalog --xml-file tests/skos-test-topics.rdf
 
 # Ingest with explicit STAC API URL
 sfeos-tools ingest-catalog --xml-file demo-notebooks/traffic-signs.rdf --stac-url http://localhost:8080
+
+# Ingest with language filtering (extract only English labels)
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url http://localhost:8080 --lang en
+
+# Ingest with language filtering (extract only French labels)
+sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url http://localhost:8080 --lang fr
 
 # Ingest with basic authentication
 sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --user myuser --password mypass
@@ -341,8 +352,8 @@ sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-ap
 # Ingest with SSL verification disabled
 sfeos-tools ingest-catalog --xml-file concepts.xml --stac-url https://my-stac-api.com --no-ssl
 
-# Ingest with API key and custom SSL settings
-sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com --api-key your-api-key --no-ssl
+# Ingest with language filtering and API key authentication
+sfeos-tools ingest-catalog --xml-file /path/to/concepts.xml --stac-url https://my-stac-api.com --lang en --api-key your-api-key --no-ssl
 ```
 
 ### crawl-graph

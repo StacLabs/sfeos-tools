@@ -42,6 +42,7 @@ from .cli_options import (
     auth_options,
     configure_session_auth,
     database_options,
+    lang_options,
     prepare_auth_headers_and_verify,
     set_es_env_vars,
     stac_api_options,
@@ -267,8 +268,15 @@ def load_data(
 )
 @stac_api_options
 @auth_options
+@lang_options
 def ingest_catalog(
-    xml_file: str, stac_url: str, use_ssl: bool, user: str, password: str, api_key: str
+    xml_file: str,
+    stac_url: str,
+    use_ssl: bool,
+    user: str,
+    password: str,
+    api_key: str,
+    lang: str,
 ) -> None:
     """Ingest SKOS/RDF-XML file to create STAC catalogs and sub-catalogs.
 
@@ -294,6 +302,7 @@ def ingest_catalog(
             password=password,
             use_ssl=use_ssl,
             api_key=api_key,
+            lang=lang,
         )
         click.echo(
             click.style("✓ Catalog ingestion completed successfully", fg="green")
@@ -524,8 +533,8 @@ def crawl_graph(
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-
-    catalogs_endpoint = urljoin(stac_url, "/catalogs?limit=100")
+    stac_url = stac_url if stac_url.endswith("/") else stac_url + "/"
+    catalogs_endpoint = urljoin(stac_url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
@@ -694,8 +703,8 @@ def visualize_graph(
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-
-    catalogs_endpoint = urljoin(stac_url, "/catalogs?limit=100")
+    stac_url = stac_url if stac_url.endswith("/") else stac_url + "/"
+    catalogs_endpoint = urljoin(stac_url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
