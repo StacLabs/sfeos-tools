@@ -148,7 +148,7 @@ class TestCrawlGraph:
             ]
 
             result = runner.invoke(
-                cli, ["crawl-graph", "--url", "http://localhost:8080"]
+                cli, ["crawl-graph", "--stac-url", "http://localhost:8080"]
             )
 
             assert result.exit_code == 0
@@ -189,7 +189,13 @@ class TestCrawlGraph:
 
             result = runner.invoke(
                 cli,
-                ["crawl-graph", "--url", "http://localhost:8080", "--output", "json"],
+                [
+                    "crawl-graph",
+                    "--stac-url",
+                    "http://localhost:8080",
+                    "--output",
+                    "json",
+                ],
             )
 
             assert result.exit_code == 0
@@ -243,7 +249,7 @@ class TestCrawlGraph:
             ]
 
             result = runner.invoke(
-                cli, ["crawl-graph", "--url", "http://localhost:8080"]
+                cli, ["crawl-graph", "--stac-url", "http://localhost:8080"]
             )
 
             assert result.exit_code == 0
@@ -300,7 +306,7 @@ class TestCrawlGraph:
             ]
 
             result = runner.invoke(
-                cli, ["crawl-graph", "--url", "http://localhost:8080"]
+                cli, ["crawl-graph", "--stac-url", "http://localhost:8080"]
             )
 
             assert result.exit_code == 0
@@ -362,7 +368,7 @@ class TestCrawlGraph:
             ]
 
             result = runner.invoke(
-                cli, ["crawl-graph", "--url", "http://localhost:8080"]
+                cli, ["crawl-graph", "--stac-url", "http://localhost:8080"]
             )
 
             assert result.exit_code == 0
@@ -422,7 +428,7 @@ class TestVisualizeGraph:
         ]
 
         result = runner.invoke(
-            cli, ["visualize-graph", "--url", "http://localhost:8080"]
+            cli, ["visualize-graph", "--stac-url", "http://localhost:8080"]
         )
 
         assert result.exit_code == 0
@@ -492,7 +498,7 @@ class TestVisualizeGraph:
         ]
 
         result = runner.invoke(
-            cli, ["visualize-graph", "--url", "http://localhost:8080"]
+            cli, ["visualize-graph", "--stac-url", "http://localhost:8080"]
         )
 
         assert result.exit_code == 0

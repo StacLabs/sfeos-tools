@@ -6,6 +6,12 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+## [v0.8.0] - 2026-05-07
+
+### Changed
+
+- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency. ([#15](https://github.com/stac-utils/stac-fastapi-pgstac/pull/15))
+
 ### Added
 
 - Language option is added to ingest-catalog CLI command to filter ingestion based on language when the rdf/xml file is multilingual. ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
@@ -93,7 +99,8 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 - Initial release
 
-[Unreleased]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.7.0..main
+[Unreleased]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.8.0..main
+[v0.8.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.7.0...v0.8.0)
 [v0.7.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.4.0...v0.5.0

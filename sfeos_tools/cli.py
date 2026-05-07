@@ -357,7 +357,10 @@ def ingest_catalog(
     default=8501,
     help="Port for the Streamlit viewer (default: 8501)",
 )
-def viewer(stac_url: str, port: int) -> None:
+@auth_options
+def viewer(
+    stac_url: str, port: int, use_ssl: bool, user: str, password: str, api_key: str
+) -> None:
     """Launch interactive Streamlit viewer for exploring STAC collections and items.
 
     This command starts a local web-based viewer that allows you to:
@@ -370,7 +373,11 @@ def viewer(stac_url: str, port: int) -> None:
         sfeos-tools viewer
         sfeos-tools viewer --stac-url http://localhost:8080
         sfeos-tools viewer --stac-url https://my-stac-api.com --port 8502
+        sfeos-tools viewer --stac-url https://my-stac-api.com --api-key my-key
+        sfeos-tools viewer --stac-url https://my-stac-api.com --user admin --password secret
     """
+    validate_auth_options(user, password, api_key)
+
     try:
         import sys
         from pathlib import Path
@@ -384,6 +391,7 @@ def viewer(stac_url: str, port: int) -> None:
         import os
 
         os.environ["SFEOS_STAC_URL"] = stac_url
+        set_es_env_vars(use_ssl=use_ssl, user=user, password=password, api_key=api_key)
 
         click.echo(click.style("🚀 Starting SFEOS Viewer...", fg="green"))
         click.echo(click.style(f"📡 STAC API: {stac_url}", fg="cyan"))
@@ -480,11 +488,7 @@ def _fetch_all_paginated(
 
 
 @cli.command("crawl-graph")
-@click.option(
-    "--url",
-    default="http://localhost:8080",
-    help="The base URL of the SFEOS API.",
-)
+@stac_api_options
 @click.option(
     "--output",
     type=click.Choice(["text", "json"]),
@@ -493,7 +497,7 @@ def _fetch_all_paginated(
 )
 @auth_options
 def crawl_graph(
-    url: str, output: str, use_ssl: bool, user: str, password: str, api_key: str
+    stac_url: str, output: str, use_ssl: bool, user: str, password: str, api_key: str
 ) -> None:
     """Crawl the SFEOS Multi-Tenant Catalogs and Collections to build and display the DAG.
 
@@ -506,10 +510,10 @@ def crawl_graph(
 
     Examples:
         sfeos-tools crawl-graph
-        sfeos-tools crawl-graph --url http://localhost:8080
-        sfeos-tools crawl-graph --url https://my-sfeos-api.com --output json
-        sfeos-tools crawl-graph --url https://my-sfeos-api.com --api-key my-key
-        sfeos-tools crawl-graph --url https://my-sfeos-api.com --user admin --password secret
+        sfeos-tools crawl-graph --stac-url http://localhost:8080
+        sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --output json
+        sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --api-key my-key
+        sfeos-tools crawl-graph --stac-url https://my-sfeos-api.com --user admin --password secret
     """
     if nx is None:
         click.echo(
@@ -522,13 +526,15 @@ def crawl_graph(
 
     validate_auth_options(user, password, api_key)
 
-    click.echo(click.style(f"🌲 Crawling SFEOS Multi-Tenant API at {url}...", fg="cyan"))
+    click.echo(
+        click.style(f"🌲 Crawling SFEOS Multi-Tenant API at {stac_url}...", fg="cyan")
+    )
 
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-    url = url if url.endswith("/") else url + "/"
-    catalogs_endpoint = urljoin(url, "catalogs?limit=100")
+    stac_url = stac_url if stac_url.endswith("/") else stac_url + "/"
+    catalogs_endpoint = urljoin(stac_url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
@@ -546,7 +552,7 @@ def crawl_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(url, f"catalogs/{current_id}/children")
+                children_endpoint = urljoin(stac_url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -568,7 +574,7 @@ def crawl_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    url, f"catalogs/{current_id}/collections"
+                    stac_url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"
@@ -640,11 +646,7 @@ def _print_tree(
 
 
 @cli.command("visualize-graph")
-@click.option(
-    "--url",
-    default="http://localhost:8080",
-    help="The base URL of the SFEOS API.",
-)
+@stac_api_options
 @click.option(
     "--layout",
     type=click.Choice(
@@ -655,7 +657,7 @@ def _print_tree(
 )
 @auth_options
 def visualize_graph(
-    url: str, layout: str, use_ssl: bool, user: str, password: str, api_key: str
+    stac_url: str, layout: str, use_ssl: bool, user: str, password: str, api_key: str
 ) -> None:
     """Crawl SFEOS API and open an interactive web visualization of the DAG.
 
@@ -667,12 +669,12 @@ def visualize_graph(
 
     Examples:
         sfeos-tools visualize-graph
-        sfeos-tools visualize-graph --url http://localhost:8080
+        sfeos-tools visualize-graph --stac-url http://localhost:8080
         sfeos-tools visualize-graph --layout hierarchical-lr
         sfeos-tools visualize-graph --layout force
-        sfeos-tools visualize-graph --url https://my-sfeos-api.com --layout spring
-        sfeos-tools visualize-graph --url https://my-sfeos-api.com --api-key my-key
-        sfeos-tools visualize-graph --url https://my-sfeos-api.com --user admin --password secret
+        sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --layout spring
+        sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --api-key my-key
+        sfeos-tools visualize-graph --stac-url https://my-sfeos-api.com --user admin --password secret
     """
     if nx is None:
         click.echo(
@@ -694,13 +696,13 @@ def visualize_graph(
 
     validate_auth_options(user, password, api_key)
 
-    click.echo(click.style(f"🕸️ Crawling {url} for visualization...", fg="cyan"))
+    click.echo(click.style(f"🕸️ Crawling {stac_url} for visualization...", fg="cyan"))
 
     dag = nx.DiGraph()
     session = requests.Session()
     configure_session_auth(session, user, password, api_key, use_ssl)
-    url = url if url.endswith("/") else url + "/"
-    catalogs_endpoint = urljoin(url, "catalogs?limit=100")
+    stac_url = stac_url if stac_url.endswith("/") else stac_url + "/"
+    catalogs_endpoint = urljoin(stac_url, "catalogs?limit=100")
     try:
         all_catalogs = _fetch_all_paginated(session, catalogs_endpoint, "catalogs")
 
@@ -723,7 +725,7 @@ def visualize_graph(
             current_id = catalog["id"]
 
             try:
-                children_endpoint = urljoin(url, f"catalogs/{current_id}/children")
+                children_endpoint = urljoin(stac_url, f"catalogs/{current_id}/children")
                 children = _fetch_all_paginated(session, children_endpoint, "children")
 
                 for child in children:
@@ -745,7 +747,7 @@ def visualize_graph(
 
             try:
                 collections_endpoint = urljoin(
-                    url, f"catalogs/{current_id}/collections"
+                    stac_url, f"catalogs/{current_id}/collections"
                 )
                 collections = _fetch_all_paginated(
                     session, collections_endpoint, "collections"
