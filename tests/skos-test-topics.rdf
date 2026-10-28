@@ -78,6 +78,7 @@
 	<skos:definition xml:lang="en">Natural flowing watercourses, usually freshwater, flowing towards an ocean, sea, lake or another river.</skos:definition>
 	<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-03-03</dct:modified>
 	<skos:broader rdf:resource="https://mock.example.int/concept/33333333-3333-3333-3333-333333333333"/>
+	<skos:broader rdf:resource="https://mock.example.int/concept/22222222-2222-2222-2222-222222222222"/>
     <skos:related rdf:resource="https://mock.example.int/concept/44444444-4444-4444-4444-444444444444"/>
 	<skos:closeMatch rdf:resource="https://www.mock-gemet.eu/concept/river-456"/>
 	<skos:inScheme rdf:resource="https://mock.example.int/concepts/concept_scheme/observation-domains"/>
