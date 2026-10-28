@@ -230,7 +230,11 @@ def ingest_from_xml(
             "links": stac_links,
         }
 
-        # Create the sub-catalog under EACH parent (poly-hierarchy support)
+        # Create the sub-catalog under EACH parent (poly-hierarchy support).
+        # The catalogs spec only defines linking via a minimal {"id": ...}
+        # body — a full-body repost of an existing id is a 409 with no
+        # link side-effect. So: full body creates on first use; a 409
+        # falls back to link-mode so the edge still lands.
         for parent_uri in parent_uris:
             parent_id = uri_to_stac_id.get(parent_uri)
             if not parent_id:
@@ -243,7 +247,15 @@ def ingest_from_xml(
                 auth=auth,
                 verify=verify_ssl,
             )
-            if res.status_code in [201, 200, 409]:
+            if res.status_code == 409:
+                res = requests.post(
+                    f"{stac_api_url}/catalogs/{parent_id}/catalogs",
+                    json={"id": child_id},
+                    headers=headers,
+                    auth=auth,
+                    verify=verify_ssl,
+                )
+            if res.status_code in [201, 200]:
                 print(f"Created sub-catalog: {parent_id} -> {child_id}")
             else:
                 print(

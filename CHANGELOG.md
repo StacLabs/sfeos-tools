@@ -6,6 +6,10 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `ingest_from_xml()` silently dropping parent-child links for catalogs that already exist. A full-body POST that returns `409` now falls back to a minimal `{"id": child_id}` link-mode POST to `/catalogs/{parent_id}/catalogs`, so poly-hierarchy edges are still created instead of being treated as success with no side-effect.
+
 ## [v0.8.0] - 2026-05-07
 
 ### Changed
