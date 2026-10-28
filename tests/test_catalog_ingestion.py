@@ -122,11 +122,34 @@ class TestIngestFromXml:
                     child_creation_counts.get(child_id, 0) + 1
                 )
 
-        # At least one child should be created multiple times (poly-hierarchy)
-        # This depends on the test RDF file having poly-hierarchy relationships
-        # If the test file doesn't have poly-hierarchy, this assertion may not trigger
-        # but the test still validates that the code handles multiple parents correctly
-        assert len(child_creation_counts) > 0
+        # river-systems has two skos:broader parents in the test fixture
+        assert child_creation_counts.get("river-systems") == 2
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_from_xml_links_existing_child_to_additional_parents(
+        self, mock_post, test_xml_file
+    ):
+        """Test that a child created under one parent is linked (not reposted) to others."""
+        mock_response = Mock()
+        mock_response.status_code = 201
+        mock_response.headers = {}
+        mock_post.return_value = mock_response
+
+        ingest_from_xml(str(test_xml_file), "http://localhost:8080")
+
+        # river-systems has two parents: first gets the full body, second gets {"id"}
+        river_calls = [
+            call
+            for call in mock_post.call_args_list
+            if call[0][0].count("/catalogs") > 1
+            and call[1]["json"].get("id") == "river-systems"
+        ]
+        full_body = [c for c in river_calls if "type" in c[1]["json"]]
+        link_mode = [c for c in river_calls if set(c[1]["json"]) == {"id"}]
+
+        assert len(full_body) == 1
+        assert len(link_mode) == 1
+        assert len({c[0][0] for c in river_calls}) == 2
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")
     def test_ingest_from_xml_handles_409_conflict(self, mock_post, test_xml_file):
@@ -137,6 +160,76 @@ class TestIngestFromXml:
 
         # Should not raise an exception
         ingest_from_xml(str(test_xml_file), "http://localhost:8080")
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_from_xml_409_falls_back_to_link_mode(
+        self, mock_post, test_xml_file
+    ):
+        """Test that a 409 on a full-body sub-catalog POST retries with minimal {"id"}."""
+
+        def fake_post(url, json=None, **kwargs):
+            resp = Mock()
+            resp.headers = {}
+            resp.text = "Conflict"
+            resp.status_code = 200 if set(json) == {"id"} else 409
+            return resp
+
+        mock_post.side_effect = fake_post
+
+        ingest_from_xml(str(test_xml_file), "http://localhost:8080")
+
+        subcatalog_calls = [
+            call
+            for call in mock_post.call_args_list
+            if call[0][0].count("/catalogs") > 1
+        ]
+        full_body_calls = [
+            call for call in subcatalog_calls if "type" in call[1]["json"]
+        ]
+
+        # Every full-body attempt that 409'd must be followed by a
+        # minimal {"id": child_id} link POST to the same parent URL
+        assert len(full_body_calls) > 0
+        for call in full_body_calls:
+            url = call[0][0]
+            child_id = call[1]["json"]["id"]
+            assert any(
+                c[0][0] == url and c[1]["json"] == {"id": child_id}
+                for c in subcatalog_calls
+            )
+
+    @patch("sfeos_tools.catalog_ingestion.requests.post")
+    def test_ingest_from_xml_200_warning_falls_back_to_link_mode(
+        self, mock_post, test_xml_file
+    ):
+        """Test that older servers returning 200 + Warning for existing ids also trigger link-mode."""
+
+        def fake_post(url, json=None, **kwargs):
+            resp = Mock()
+            resp.text = ""
+            if set(json) == {"id"}:
+                resp.status_code = 200
+                resp.headers = {}
+            else:
+                resp.status_code = 200
+                resp.headers = {"Warning": '299 - "Catalog id already exists"'}
+            return resp
+
+        mock_post.side_effect = fake_post
+
+        ingest_from_xml(str(test_xml_file), "http://localhost:8080")
+
+        subcatalog_calls = [
+            call
+            for call in mock_post.call_args_list
+            if call[0][0].count("/catalogs") > 1
+        ]
+        link_calls = [
+            call for call in subcatalog_calls if set(call[1]["json"]) == {"id"}
+        ]
+
+        # Each of the 5 hierarchy edges must have been linked
+        assert len(link_calls) == 5
 
     @patch("sfeos_tools.catalog_ingestion.requests.post")
     def test_ingest_from_xml_catalog_payload_structure(self, mock_post, test_xml_file):

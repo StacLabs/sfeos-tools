@@ -175,6 +175,7 @@ def ingest_from_xml(
 
     # Pass 2: Create sub-catalogs under their parents (supports poly-hierarchy)
     print("\nCreating sub-catalogs...")
+    existing_child_ids = set()  # child ids known to already exist on the server
     for child_uri, parent_uris in hierarchy_map.items():
         child_id = uri_to_stac_id.get(child_uri)
         if not child_id:
@@ -233,21 +234,33 @@ def ingest_from_xml(
         # Create the sub-catalog under EACH parent (poly-hierarchy support).
         # The catalogs spec only defines linking via a minimal {"id": ...}
         # body — a full-body repost of an existing id is a 409 with no
-        # link side-effect. So: full body creates on first use; a 409
-        # falls back to link-mode so the edge still lands.
+        # link side-effect (older servers return 200 + Warning instead).
+        # So: full body creates on first use; once the child is known to
+        # exist we link directly, and a 409/Warning falls back to
+        # link-mode so the edge still lands.
         for parent_uri in parent_uris:
             parent_id = uri_to_stac_id.get(parent_uri)
             if not parent_id:
                 continue
 
-            res = requests.post(
-                f"{stac_api_url}/catalogs/{parent_id}/catalogs",
-                json=catalog_payload,
-                headers=headers,
-                auth=auth,
-                verify=verify_ssl,
-            )
-            if res.status_code == 409:
+            link_mode = child_id in existing_child_ids
+            if not link_mode:
+                res = requests.post(
+                    f"{stac_api_url}/catalogs/{parent_id}/catalogs",
+                    json=catalog_payload,
+                    headers=headers,
+                    auth=auth,
+                    verify=verify_ssl,
+                )
+                if res.status_code == 409 or (
+                    res.status_code == 200 and res.headers.get("Warning")
+                ):
+                    link_mode = True
+                elif res.status_code in [201, 200]:
+                    existing_child_ids.add(child_id)
+
+            if link_mode:
+                existing_child_ids.add(child_id)
                 res = requests.post(
                     f"{stac_api_url}/catalogs/{parent_id}/catalogs",
                     json={"id": child_id},
@@ -255,11 +268,14 @@ def ingest_from_xml(
                     auth=auth,
                     verify=verify_ssl,
                 )
+
             if res.status_code in [201, 200]:
-                print(f"Created sub-catalog: {parent_id} -> {child_id}")
+                action = "Linked" if link_mode else "Created"
+                print(f"{action} sub-catalog: {parent_id} -> {child_id}")
             else:
+                action = "link" if link_mode else "create"
                 print(
-                    f"Failed to create sub-catalog {child_id} under {parent_id}: {res.text}"
+                    f"Failed to {action} sub-catalog {child_id} under {parent_id}: {res.text}"
                 )
 
     print("\nStructural hierarchy established.")

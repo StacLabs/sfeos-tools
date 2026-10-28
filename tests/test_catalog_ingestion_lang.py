@@ -128,8 +128,13 @@ class TestIngestWithLanguageFilter:
 
         ingest_from_xml(str(test_xml_file), "http://localhost:8080", lang=None)
 
-        # Get all payloads sent to the STAC API
-        all_payloads = [call[1]["json"] for call in mock_post.call_args_list]
+        # Get all full catalog payloads sent to the STAC API
+        # (minimal {"id": ...} link-mode payloads carry no links)
+        all_payloads = [
+            call[1]["json"]
+            for call in mock_post.call_args_list
+            if "links" in call[1]["json"]
+        ]
 
         for payload in all_payloads:
             # Extract the SKOS Exact Match link
