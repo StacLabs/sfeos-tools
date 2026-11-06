@@ -6,6 +6,8 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ## [Unreleased]
 
+## [v0.8.1] - 2026-11-06
+
 ### Fixed
 
 - Fixed `ingest_from_xml()` silently dropping parent-child links for catalogs that already exist. A full-body POST that returns `409` — or `200` with a `Warning` header on older servers — now falls back to a minimal `{"id": child_id}` link-mode POST to `/catalogs/{parent_id}/catalogs`, so poly-hierarchy edges are still created instead of being treated as success with no side-effect. Children already created under one parent are now linked directly to additional parents without a doomed full-body repost.
@@ -14,18 +16,18 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 ### Changed
 
-- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency. ([#15](https://github.com/stac-utils/stac-fastapi-pgstac/pull/15))
+- Standardized all STAC API commands (`load-data`, `crawl-graph`, `visualize-graph`, `viewer`) to use `@stac_api_options` decorator with `--stac-url` parameter for consistency. ([#15](https://github.com/healy-hyperspatial/sfeos-tools/pull/15))
 
 ### Added
 
-- Language option is added to ingest-catalog CLI command to filter ingestion based on language when the rdf/xml file is multilingual. ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
-- Added SKOS concept url as exact match link for tracability ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
-- Added tests for new `--lang` option and chane to use `alternate` links. ([#17](https://github.com/stac-utils/stac-fastapi-pgstac/pull/17))
+- Language option is added to ingest-catalog CLI command to filter ingestion based on language when the rdf/xml file is multilingual. ([#16](https://github.com/healy-hyperspatial/sfeos-tools/pull/16))
+- Added SKOS concept url as exact match link for tracability ([#16](https://github.com/healy-hyperspatial/sfeos-tools/pull/16))
+- Added tests for new `--lang` option and chane to use `alternate` links. ([#17](https://github.com/healy-hyperspatial/sfeos-tools/pull/17))
 
 ### Updated
 
-- Fixed urljoin to keep routes when appending addresses. ([#16](https://github.com/stac-utils/stac-fastapi-pgstac/pull/16))
-- Readme it document new `--lang` option ([#17](https://github.com/stac-utils/stac-fastapi-pgstac/pull/17))
+- Fixed urljoin to keep routes when appending addresses. ([#16](https://github.com/healy-hyperspatial/sfeos-tools/pull/16))
+- Readme it document new `--lang` option ([#17](https://github.com/healy-hyperspatial/sfeos-tools/pull/17))
 
 ## [v0.7.0] - 2026-04-30
 
@@ -103,8 +105,9 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 
 - Initial release
 
-[Unreleased]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.8.0..main
-[v0.8.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.7.0...v0.8.0)
+[Unreleased]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.8.1...main
+[v0.8.1]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.8.0...v0.8.1
+[v0.8.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.7.0...v0.8.0
 [v0.7.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.4.0...v0.5.0
@@ -112,4 +115,4 @@ The format is (loosely) based on [Keep a Changelog](http://keepachangelog.com/) 
 [v0.3.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.1.0...v0.1.1
-[v0.1.0]: https://github.com/healy-hyperspatial/sfeos-tools/compare/v0.1.0
+[v0.1.0]: https://github.com/healy-hyperspatial/sfeos-tools/releases/tag/v0.1.0
